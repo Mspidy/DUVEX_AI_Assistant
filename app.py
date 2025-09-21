@@ -55,22 +55,39 @@ if uploaded_file:
         x_axis = st.selectbox("Select X-axis column", columns)
         y_axes = st.multiselect("Select one or more Y-axis columns", columns)
 
-        graph_type = st.radio("Choose graph type", ["Line", "Bar", "Scatter"])
+        graph_type = st.radio("Choose graph type", ["Line", "Bar", "Scatter", "Pie", "Radar"])
 
-        # Graph generation
         if x_axis and y_axes:
             st.subheader("📊 Generated Graphs")
             for y in y_axes:
                 fig, ax = plt.subplots()
+
                 if graph_type == "Line":
                     ax.plot(df[x_axis], df[y], marker='o')
                 elif graph_type == "Bar":
                     ax.bar(df[x_axis], df[y])
                 elif graph_type == "Scatter":
                     ax.scatter(df[x_axis], df[y])
-                ax.set_xlabel(x_axis)
-                ax.set_ylabel(y)
-                ax.set_title(f"{y} vs {x_axis}")
+                elif graph_type == "Pie":
+                    pie_data = df[y].value_counts()
+                    fig, ax = plt.subplots()
+                    ax.pie(pie_data, labels=pie_data.index, autopct='%1.1f%%')
+                    ax.set_title(f"{y} Distribution")
+                elif graph_type == "Radar":
+                    categories = df[x_axis].astype(str).tolist()
+                    values = df[y].tolist()
+                    angles = [n / float(len(categories)) * 2 * 3.14159 for n in range(len(categories))]
+                    values += values[:1]
+                    angles += angles[:1]
+
+                    fig = plt.figure(figsize=(6, 6))
+                    ax = plt.subplot(111, polar=True)
+                    ax.plot(angles, values, marker='o')
+                    ax.fill(angles, values, alpha=0.25)
+                    ax.set_xticks(angles[:-1])
+                    ax.set_xticklabels(categories)
+                    ax.set_title(f"{y} Radar Chart")
+
                 st.pyplot(fig)
 
                 # 📥 Download graph as PNG
@@ -79,7 +96,7 @@ if uploaded_file:
                 st.download_button(
                     label=f"📥 Download '{y} vs {x_axis}' Graph",
                     data=buf.getvalue(),
-                    file_name=f"{y}_vs_{x_axis}.png",
+                    file_name=f"{y}_vs_{x_axis}_{graph_type}.png",
                     mime="image/png"
                 )
 
