@@ -56,21 +56,26 @@ if uploaded_file:
         y_axes = st.multiselect("Select one or more Y-axis columns", columns)
 
         graph_type = st.radio("Choose graph type", ["Line", "Bar", "Scatter", "Pie", "Radar"])
+        width = st.slider("Graph Width (inches)", min_value=4, max_value=20, value=10)
+        height = st.slider("Graph Height (inches)", min_value=3, max_value=12, value=5)
 
         if x_axis and y_axes:
             st.subheader("📊 Generated Graphs")
             for y in y_axes:
-                fig, ax = plt.subplots()
+                fig, ax = plt.subplots(figsize=(width, height))
 
                 if graph_type == "Line":
                     ax.plot(df[x_axis], df[y], marker='o')
+                    ax.set_title(f"{y} vs {x_axis}")
                 elif graph_type == "Bar":
                     ax.bar(df[x_axis], df[y])
+                    ax.set_title(f"{y} vs {x_axis}")
                 elif graph_type == "Scatter":
                     ax.scatter(df[x_axis], df[y])
+                    ax.set_title(f"{y} vs {x_axis}")
                 elif graph_type == "Pie":
                     pie_data = df[y].value_counts()
-                    fig, ax = plt.subplots()
+                    fig, ax = plt.subplots(figsize=(width, width))  # square pie chart
                     ax.pie(pie_data, labels=pie_data.index, autopct='%1.1f%%')
                     ax.set_title(f"{y} Distribution")
                 elif graph_type == "Radar":
@@ -80,7 +85,7 @@ if uploaded_file:
                     values += values[:1]
                     angles += angles[:1]
 
-                    fig = plt.figure(figsize=(6, 6))
+                    fig = plt.figure(figsize=(width, width))
                     ax = plt.subplot(111, polar=True)
                     ax.plot(angles, values, marker='o')
                     ax.fill(angles, values, alpha=0.25)
